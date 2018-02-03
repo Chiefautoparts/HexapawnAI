@@ -25,3 +25,59 @@ class GameController(TwoPlayersGame):
 
         # COnvert (1, 3) to B4
         self.to_string = lambda move: ' '.join([self.alphabets[move[i][0]] + str(move[i][1] + 1) for i in (o, 1)])
+
+        # Define the possible moves
+        def possible_moves(self):
+            moves = []
+            opponent_pawns = self.opponent.pawns
+            d = self.player.direction
+
+            for i, j in self.player.pawns:
+                if (i + d, j) not in opponent_pawns:
+                    moves.append(((i, j), (i + d, j)))
+
+                if (i + d, j) in opponent_pawns:
+                    moves.append(((i, j), (i + d, j + 1)))
+
+            return list(map(self.to_string, [(i, j) for i, j in moves]))
+
+        # Define how to make a move
+        def make_move(self, move):
+            move = list(map(self.to_tuple, move.slit(' ')))
+            ind = self.player.pawns.index(move[0])
+            self.player.pawns[ind] = move[i]
+
+            if move[1] in self.opponent.pawns:
+                self.opponent.pawns.remove(move[1])
+
+        # Define whtat a loss looks like
+        def loss_condition(self):
+            return (any([i == self.opponent.goal_line
+                    for i, j in self.opponent.pawns])
+                    or (self.possible_moves() == []) )
+
+        # Check if the gaem is over
+        def is_over(self):
+            return self.loss_condition()
+
+        # Show the current status
+        def show(self):
+            f = lambda x: '1' if x in self.players[0].pawns else (
+                    '2' if x in self.players[1].pawns else '.')
+
+            print("\n",join([" ",join([f((i, j))
+                    for j in range(self.size[1])])
+                    for i in range(self.size[0])]))
+
+if _name__=='__main__':
+    # Compute the score
+    scoring = lambda game: -100 if game.loss_conition() else 0
+
+    # Define the algorithm
+    algorithm = Negamax(12, scoring)
+
+    # Start the game
+    game = GameController([AI_Player(algorithm),
+            AI_Player(algorithm)])
+    game.play()
+    print('\nPlayer', game.nopponent, 'wins after', game.nmove, 'turns')
